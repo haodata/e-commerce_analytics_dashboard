@@ -1,0 +1,242 @@
+
+<h2 class="sr-only">Comprehensive order analytics dashboard covering sales, profit, country, customer, time, logistics, and anomaly analysis</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.dash { padding: 1rem 0; }
+.section { margin-bottom: 2rem; }
+.section-title { font-size: 13px; font-weight: 500; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; }
+.metric-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
+.metric-value { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.metric-sub { font-size: 11px; color: var(--color-text-tertiary); margin-top: 2px; }
+.chart-wrap { position: relative; width: 100%; }
+.tabs { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
+.tab { font-size: 12px; padding: 5px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); cursor: pointer; color: var(--color-text-secondary); background: transparent; }
+.tab.active { background: var(--color-background-secondary); color: var(--color-text-primary); border-color: var(--color-border-primary); font-weight: 500; }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; font-size: 12px; color: var(--color-text-secondary); }
+.legend span { display: flex; align-items: center; gap: 5px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+.anomaly-badges { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+.badge { font-size: 12px; padding: 4px 10px; border-radius: var(--border-radius-md); }
+.badge-info { background: #E6F1FB; color: #042C53; }
+@media (prefers-color-scheme: dark) {
+  .badge-info { background: #042C53; color: #B5D4F4; }
+}
+</style>
+
+<div class="dash">
+
+<div class="section">
+  <div class="section-title">1 · Sales Overview</div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Total revenue</div><div class="metric-value">348.8M</div><div class="metric-sub">SEK (excl. VAT)</div></div>
+    <div class="metric"><div class="metric-label">Total orders</div><div class="metric-value">682,792</div><div class="metric-sub">Oct 2018 – Oct 2020</div></div>
+    <div class="metric"><div class="metric-label">Avg. order value</div><div class="metric-value">510.8</div><div class="metric-sub">SEK / order</div></div>
+    <div class="metric"><div class="metric-label">Total profit</div><div class="metric-value">218.4M</div><div class="metric-sub">SEK</div></div>
+    <div class="metric"><div class="metric-label">Avg. profit margin</div><div class="metric-value">64.2%</div><div class="metric-sub">Range: 42%–83%</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchSales('orders',this)">Order volume</button>
+    <button class="tab" onclick="switchSales('sales',this)">Revenue</button>
+  </div>
+  <div class="legend"><span><span class="legend-dot" style="background:#378ADD"></span>Monthly trend</span></div>
+  <div class="chart-wrap" style="height:220px"><canvas id="salesChart" role="img" aria-label="Monthly sales trend line chart, Oct 2018 to Oct 2020">Monthly order volume and revenue trend.</canvas></div>
+</div>
+
+<div class="section">
+  <div class="section-title">2 · Country Analysis</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchCountry('orders',this)">Orders</button>
+    <button class="tab" onclick="switchCountry('sales',this)">Revenue</button>
+    <button class="tab" onclick="switchCountry('margin',this)">Profit margin</button>
+    <button class="tab" onclick="switchCountry('fee',this)">Avg. shipping fee</button>
+  </div>
+  <div class="legend"><span><span class="legend-dot" style="background:#1D9E75"></span>Top 12 countries</span></div>
+  <div class="chart-wrap" style="height:360px"><canvas id="countryChart" role="img" aria-label="Horizontal bar chart by country for orders, revenue, margin, or shipping fee">Country-level order and sales analysis.</canvas></div>
+  <div class="anomaly-badges">
+    <span class="badge badge-info">Billing ≠ Shipping: only 15 orders (negligible cross-border mismatch)</span>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">3 · Customer Analysis</div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Total customers</div><div class="metric-value">577,950</div></div>
+    <div class="metric"><div class="metric-label">Repeat buyers</div><div class="metric-value">82,041</div><div class="metric-sub">14.2% of customers</div></div>
+    <div class="metric"><div class="metric-label">One-time buyers</div><div class="metric-value">495,909</div><div class="metric-sub">85.8% of customers</div></div>
+    <div class="metric"><div class="metric-label">Top customer LTV</div><div class="metric-value">54,339</div><div class="metric-sub">SEK (16 orders)</div></div>
+  </div>
+  <div class="two-col">
+    <div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">Repeat vs. one-time buyers</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="repeatChart" role="img" aria-label="Doughnut chart of repeat vs one-time buyers">Repeat purchase rate.</canvas></div>
+    </div>
+    <div>
+      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">Top 10 customers by LTV (SEK)</div>
+      <div class="chart-wrap" style="height:200px"><canvas id="ltvChart" role="img" aria-label="Horizontal bar chart of top 10 customers by lifetime value">High-value customer analysis.</canvas></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">4 · Time Analysis</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTime('month',this)">By month</button>
+    <button class="tab" onclick="switchTime('dow',this)">By weekday</button>
+    <button class="tab" onclick="switchTime('hour',this)">By hour</button>
+  </div>
+  <div class="chart-wrap" style="height:220px"><canvas id="timeChart" role="img" aria-label="Order distribution by month, weekday, or hour">Order time distribution.</canvas></div>
+</div>
+
+<div class="section">
+  <div class="section-title">5 · Logistics & Shipping Analysis</div>
+  <div class="chart-wrap" style="height:260px"><canvas id="shippingChart" role="img" aria-label="Bubble chart of avg. shipping fee vs. avg. order weight by country">Shipping fee vs. order weight by country.</canvas></div>
+</div>
+
+<div class="section">
+  <div class="section-title">6 · Anomaly Analysis</div>
+  <div class="metrics">
+    <div class="metric"><div class="metric-label">Very high margin (>80%)</div><div class="metric-value">13,376</div><div class="metric-sub">Avg. 82.6%</div></div>
+    <div class="metric"><div class="metric-label">Zero-profit orders</div><div class="metric-value">4,646</div><div class="metric-sub">Likely promo / gifts</div></div>
+    <div class="metric"><div class="metric-label">Very high shipping fee</div><div class="metric-value">6,826</div><div class="metric-sub">Avg. 61.6 SEK</div></div>
+    <div class="metric"><div class="metric-label">Top high-fee country</div><div class="metric-value">GB</div><div class="metric-sub">4,892 outlier orders</div></div>
+  </div>
+  <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:8px;">Top 5 countries by high-shipping-fee orders</div>
+  <div class="chart-wrap" style="height:160px"><canvas id="anomalyChart" role="img" aria-label="Bar chart of countries with most high-shipping-fee orders">High shipping fee country breakdown.</canvas></div>
+</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const monthlySales = [{"YearMonth":"2018-10","orders":1179,"sales":547260},{"YearMonth":"2018-11","orders":7301,"sales":3177738},{"YearMonth":"2018-12","orders":7720,"sales":3223921},{"YearMonth":"2019-01","orders":12857,"sales":5353931},{"YearMonth":"2019-02","orders":14566,"sales":6342175},{"YearMonth":"2019-03","orders":15937,"sales":7187011},{"YearMonth":"2019-04","orders":12791,"sales":5761256},{"YearMonth":"2019-05","orders":12634,"sales":5894280},{"YearMonth":"2019-06","orders":9966,"sales":4752906},{"YearMonth":"2019-07","orders":13867,"sales":6600470},{"YearMonth":"2019-08","orders":19699,"sales":8996842},{"YearMonth":"2019-09","orders":20937,"sales":9640627},{"YearMonth":"2019-10","orders":21436,"sales":9991014},{"YearMonth":"2019-11","orders":22909,"sales":10428083},{"YearMonth":"2019-12","orders":24103,"sales":10559594},{"YearMonth":"2020-01","orders":27183,"sales":12553317},{"YearMonth":"2020-02","orders":29165,"sales":13867228},{"YearMonth":"2020-03","orders":32096,"sales":16664965},{"YearMonth":"2020-04","orders":58365,"sales":31795013},{"YearMonth":"2020-05","orders":67299,"sales":35570109},{"YearMonth":"2020-06","orders":49475,"sales":26823665},{"YearMonth":"2020-07","orders":49408,"sales":26821160},{"YearMonth":"2020-08","orders":47686,"sales":26545946},{"YearMonth":"2020-09","orders":47072,"sales":26808314},{"YearMonth":"2020-10","orders":57141,"sales":32857915}];
+
+const countryData = [{"c":"DE","orders":156910,"sales":87709055,"margin":70.9,"fee":12.6},{"c":"SE","orders":114375,"sales":47906535,"margin":69.3,"fee":8.2},{"c":"GB","orders":77483,"sales":36329075,"margin":58.1,"fee":26.2},{"c":"DK","orders":52143,"sales":25997540,"margin":67.8,"fee":15.8},{"c":"NL","orders":50491,"sales":23396946,"margin":59.8,"fee":17.9},{"c":"FR","orders":40817,"sales":21924848,"margin":63.6,"fee":14.9},{"c":"US","orders":21977,"sales":17825043,"margin":54.4,"fee":15.1},{"c":"PL","orders":35964,"sales":15590966,"margin":58.4,"fee":16.3},{"c":"NO","orders":30297,"sales":14676104,"margin":61.8,"fee":10.2},{"c":"AT","orders":18768,"sales":11860955,"margin":59.8,"fee":9.8},{"c":"FI","orders":22359,"sales":9910142,"margin":62.3,"fee":15.9},{"c":"ES","orders":16267,"sales":8689513,"margin":58.3,"fee":11.4}];
+
+const top10 = [{"id":1034220,"spent":54339},{"id":1028997,"spent":45574},{"id":1244104,"spent":40573},{"id":1262771,"spent":27183},{"id":1064645,"spent":23784},{"id":1104366,"spent":23375},{"id":1368118,"spent":22852},{"id":1298607,"spent":20922},{"id":1028322,"spent":20771},{"id":1135489,"spent":19096}];
+
+const monthlyOrders = [40040,43731,48033,71156,79933,59441,63275,67385,68009,79756,30210,31823];
+const dowOrders = [87186,120495,103023,102802,96378,89944,82964];
+const hourlyOrders = [16259,7759,4596,3562,3128,3164,4617,8767,16078,24632,30252,33482,33946,35606,36119,36995,38158,39631,40727,46788,55768,63605,58094,41059];
+
+const shippingCountries = [
+  {c:"GB",fee:26.2,weight:1125},{c:"NZ",fee:24.7,weight:547},{c:"AU",fee:23.3,weight:840},
+  {c:"JP",fee:19.1,weight:696},{c:"NL",fee:17.9,weight:980},{c:"IE",fee:16.9,weight:1251},
+  {c:"PL",fee:16.3,weight:980},{c:"FI",fee:15.9,weight:732},{c:"DK",fee:15.8,weight:1223},
+  {c:"US",fee:15.1,weight:930},{c:"FR",fee:14.9,weight:1114},{c:"DE",fee:12.6,weight:1121},
+];
+
+const colors = ['#378ADD','#1D9E75','#D85A30','#BA7517','#7F77DD','#D4537E','#888780','#639922','#E24B4A','#5DCAA5','#EF9F27','#A32D2D'];
+
+let salesChart, countryChart, timeChart;
+
+function mkSalesChart(mode) {
+  const labels = monthlySales.map(d => d.YearMonth.slice(2));
+  const data = monthlySales.map(d => mode === 'orders' ? d.orders : Math.round(d.sales / 1000));
+  const label = mode === 'orders' ? 'Orders' : 'Revenue (K SEK)';
+  if (salesChart) salesChart.destroy();
+  salesChart = new Chart(document.getElementById('salesChart'), {
+    type: 'line',
+    data: { labels, datasets: [{ label, data, borderColor: '#378ADD', backgroundColor: 'rgba(55,138,221,0.08)', tension: 0.35, pointRadius: 2, fill: true }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 }, maxRotation: 45, autoSkip: true, maxTicksLimit: 13 } }, y: { ticks: { font: { size: 10 }, callback: v => mode === 'sales' ? v.toLocaleString() + 'K' : v.toLocaleString() } } } }
+  });
+}
+
+function switchSales(mode, btn) {
+  document.querySelectorAll('.tabs')[0].querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  mkSalesChart(mode);
+}
+
+const countryModes = {
+  orders: { data: countryData.map(d=>d.orders), label:'Orders', color:'#1D9E75' },
+  sales:  { data: countryData.map(d=>Math.round(d.sales/1000)), label:'Revenue (K SEK)', color:'#378ADD' },
+  margin: { data: countryData.map(d=>d.margin), label:'Profit margin %', color:'#7F77DD' },
+  fee:    { data: countryData.map(d=>d.fee), label:'Avg. shipping fee (SEK)', color:'#BA7517' }
+};
+
+function mkCountryChart(mode) {
+  const m = countryModes[mode];
+  if (countryChart) countryChart.destroy();
+  countryChart = new Chart(document.getElementById('countryChart'), {
+    type: 'bar',
+    data: { labels: countryData.map(d=>d.c), datasets: [{ label: m.label, data: m.data, backgroundColor: m.color + 'cc', borderColor: m.color, borderWidth: 1 }] },
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 } } }, y: { ticks: { font: { size: 11 } } } } }
+  });
+}
+
+function switchCountry(mode, btn) {
+  document.querySelectorAll('.tabs')[1].querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  mkCountryChart(mode);
+}
+
+new Chart(document.getElementById('repeatChart'), {
+  type: 'doughnut',
+  data: { labels: ['One-time buyers 85.8%', 'Repeat buyers 14.2%'], datasets: [{ data: [495909, 82041], backgroundColor: ['#88878099', '#D85A30'], borderWidth: 2 }] },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+new Chart(document.getElementById('ltvChart'), {
+  type: 'bar',
+  data: { labels: top10.map(d => '#'+d.id), datasets: [{ label: 'LTV (SEK)', data: top10.map(d=>d.spent), backgroundColor: '#1D9E75bb', borderColor: '#1D9E75', borderWidth: 1 }] },
+  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 }, callback: v => v.toLocaleString() } }, y: { ticks: { font: { size: 10 } } } } }
+});
+
+const timeDatasets = {
+  month: { labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'], data: monthlyOrders, color: '#7F77DD' },
+  dow:   { labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'], data: dowOrders, color: '#D85A30' },
+  hour:  { labels: Array.from({length:24},(_,i)=>i+':00'), data: hourlyOrders, color: '#BA7517' }
+};
+
+function mkTimeChart(mode) {
+  const t = timeDatasets[mode];
+  if (timeChart) timeChart.destroy();
+  timeChart = new Chart(document.getElementById('timeChart'), {
+    type: 'bar',
+    data: { labels: t.labels, datasets: [{ label: 'Orders', data: t.data, backgroundColor: t.color + 'bb', borderColor: t.color, borderWidth: 1 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 10 }, autoSkip: false, maxRotation: 0 } }, y: { ticks: { font: { size: 10 } } } } }
+  });
+}
+
+function switchTime(mode, btn) {
+  document.querySelectorAll('.tabs')[2].querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  mkTimeChart(mode);
+}
+
+new Chart(document.getElementById('shippingChart'), {
+  type: 'bubble',
+  data: {
+    datasets: shippingCountries.map((d,i) => ({
+      label: d.c,
+      data: [{ x: d.weight, y: d.fee, r: 12 }],
+      backgroundColor: colors[i % colors.length] + 'aa',
+      borderColor: colors[i % colors.length],
+    }))
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { position: 'right', labels: { font: { size: 11 }, padding: 8, boxWidth: 10 } } },
+    scales: {
+      x: { title: { display: true, text: 'Avg. order weight (g)', font: { size: 11 } }, ticks: { font: { size: 10 } }, min: 300, max: 1500 },
+      y: { title: { display: true, text: 'Avg. shipping fee (SEK)', font: { size: 11 } }, ticks: { font: { size: 10 } }, min: 5, max: 32 }
+    },
+    layout: { padding: 10 }
+  }
+});
+
+new Chart(document.getElementById('anomalyChart'), {
+  type: 'bar',
+  data: { labels: ['GB','CA','NO','JP','CH'], datasets: [{ label: 'High-fee orders', data: [4892,1277,357,101,79], backgroundColor: '#E24B4Abb', borderColor: '#E24B4A', borderWidth: 1 }] },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { font: { size: 12 } } }, y: { ticks: { font: { size: 10 } } } } }
+});
+
+mkSalesChart('orders');
+mkCountryChart('orders');
+mkTimeChart('month');
+</script>

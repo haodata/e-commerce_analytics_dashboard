@@ -77,6 +77,20 @@ The report is organized into 7 analytical dimensions plus a summary:
 | 05 | **Investigate anomalies** | Audit zero-profit and missing-data orders to confirm intent and fix gaps |
 | 06 | **Evening campaign focus** | Peak ordering at 21:00–22:00; schedule emails for 20:00–21:00 |
 
+## Author
+
+Wenhao Li
+
+Data Analyst | Business Intelligence | Python | SQL 
+
+GitHub:
+https://github.com/haodata
+
+LinkedIn:
+www.linkedin.com/in/wenhao-li-799a941a9
+
+
+
 ---
 
 
